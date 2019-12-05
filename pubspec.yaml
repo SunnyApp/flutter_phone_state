@@ -1,9 +1,8 @@
 name: flutter_phone_state
-description: A new flutter plugin project.
-version: 0.0.1
-author:
-homepage: "
-
+description: Initiate and track phone calls
+version: 0.5.3
+author: "ericmartineau"
+homepage: "https://github.com/SunnyApp/flutter_phone_state.git"
 
 environment:
   sdk: ">=2.6.0-dev.1.0 <3.0.0"
