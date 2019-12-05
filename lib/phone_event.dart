@@ -222,7 +222,6 @@ const Map<RawEventType, Set<PhoneCallStatus>> priorStatuses = {
 extension PhoneCallStatusExt on PhoneCallStatus {
   bool isNotBefore(RawEventType type) => !isBefore(type);
 
-  /// Whether the event type comes before our call state,eg.  Dialing comes before connected
   bool isBefore(RawEventType type) {
     return priorStatuses[type]?.contains(this) == true;
   }

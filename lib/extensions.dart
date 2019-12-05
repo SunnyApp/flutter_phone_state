@@ -40,6 +40,6 @@ extension StringExt on String {
   }
 }
 
-extension EnumExtension on dynamic {
+extension EnumExtension on Object {
   String get value => "$this".replaceAll(RegExp(".*\\."), "");
 }

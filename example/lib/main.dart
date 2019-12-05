@@ -179,4 +179,4 @@ class _CallCard extends StatelessWidget {
 
 const headerStyle = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
 const listHeaderStyle = TextStyle(fontWeight: FontWeight.bold);
-const verticalSpace = const SizedBox(height: 10);
+const verticalSpace = SizedBox(height: 10);
