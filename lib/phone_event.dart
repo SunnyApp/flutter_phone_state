@@ -116,6 +116,7 @@ class PhoneCall {
         startTime = DateTime.now();
 
   bool get isOutbound => placement == PhoneCallPlacement.outbound;
+
   bool get isInbound => placement == PhoneCallPlacement.inbound;
 
   /// Whether this call is complete
@@ -175,7 +176,7 @@ class PhoneCall {
   bool canBeLinked(RawPhoneEvent event) {
     if (event.phoneNumber != null && this.phoneNumber != null && event.phoneNumber != this.phoneNumber) return false;
     if (this.callId != null && this.callId != event.id) return false;
-    if (this.status.isNotBefore(event.type)) return false;
+    if (isNotBefore(status, event.type)) return false;
 
     return true;
   }
@@ -219,10 +220,8 @@ const Map<RawEventType, Set<PhoneCallStatus>> priorStatuses = {
   },
 };
 
-extension PhoneCallStatusExt on PhoneCallStatus {
-  bool isNotBefore(RawEventType type) => !isBefore(type);
+bool isNotBefore(PhoneCallStatus status, RawEventType type) => !isBefore(status, type);
 
-  bool isBefore(RawEventType type) {
-    return priorStatuses[type]?.contains(this) == true;
-  }
+bool isBefore(PhoneCallStatus status, RawEventType type) {
+  return priorStatuses[type]?.contains(status) == true;
 }
