@@ -44,7 +44,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   /// Extracts a list of phone calls from the accumulated events
-  Iterable<PhoneCall> get _completedCalls => Map.fromEntries(_phoneEvents.reversed.map((PhoneCallEvent event) {
+  Iterable<PhoneCall> get _completedCalls =>
+      Map.fromEntries(_phoneEvents.reversed.map((PhoneCallEvent event) {
         return MapEntry(event.call.id, event.call);
       })).values.where((c) => c.isComplete).toList();
 
@@ -73,14 +74,17 @@ class _MyAppState extends State<MyApp> {
             ]),
             verticalSpace,
             _title("Current Calls"),
-            for (final call in FlutterPhoneState.activeCalls) _CallCard(phoneCall: call),
-            if (FlutterPhoneState.activeCalls.isEmpty) Center(child: Text("No Active Calls")),
+            for (final call in FlutterPhoneState.activeCalls)
+              _CallCard(phoneCall: call),
+            if (FlutterPhoneState.activeCalls.isEmpty)
+              Center(child: Text("No Active Calls")),
             _title("Call History"),
             for (final call in _completedCalls)
               _CallCard(
                 phoneCall: call,
               ),
-            if (_completedCalls.isEmpty) Center(child: Text("No Completed Calls")),
+            if (_completedCalls.isEmpty)
+              Center(child: Text("No Completed Calls")),
             verticalSpace,
             _title("Raw Event History"),
             if (_rawEvents.isNotEmpty)
@@ -147,7 +151,8 @@ class _CallCard extends StatelessWidget {
     return Card(
       child: ListTile(
           dense: true,
-          leading: Icon(phoneCall.isOutbound ? Icons.arrow_upward : Icons.arrow_downward),
+          leading: Icon(
+              phoneCall.isOutbound ? Icons.arrow_upward : Icons.arrow_downward),
           title: Text(
             "+${phoneCall.phoneNumber ?? "Unknown number"}: ${value(phoneCall.status)}",
             overflow: TextOverflow.visible,
@@ -155,7 +160,8 @@ class _CallCard extends StatelessWidget {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (phoneCall.id?.isNotEmpty == true) Text("id: ${truncate(phoneCall.id, 12)}"),
+              if (phoneCall.id?.isNotEmpty == true)
+                Text("id: ${truncate(phoneCall.id, 12)}"),
               for (final event in phoneCall.events)
                 Text(
                   "- ${value(event.status) ?? "-"}",

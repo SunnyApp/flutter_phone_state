@@ -79,7 +79,8 @@ class FlutterPhoneState with WidgetsBindingObserver {
       /// We wait 1 second because ios has a short flash of resumed before the phone app opens
       Future.delayed(Duration(seconds: 1), () {
         final expired = lastOrNull<PhoneCall>(_calls, (PhoneCall c) {
-          return c.status == PhoneCallStatus.dialing && sinceNow(c.startTime).inSeconds < 30;
+          return c.status == PhoneCallStatus.dialing &&
+              sinceNow(c.startTime).inSeconds < 30;
         });
 
         if (expired != null) {
@@ -156,11 +157,17 @@ class FlutterPhoneState with WidgetsBindingObserver {
         _log.info("Adding a call to the stack: $event");
         matching = PhoneCall.start(
           event.phoneNumber,
-          event.type == RawEventType.inbound ? PhoneCallPlacement.inbound : PhoneCallPlacement.outbound,
+          event.type == RawEventType.inbound
+              ? PhoneCallPlacement.inbound
+              : PhoneCallPlacement.outbound,
           event.id,
         );
         _calls.add(matching);
-        _changeStatus(matching, matching.isInbound ? PhoneCallStatus.ringing : PhoneCallStatus.dialing);
+        _changeStatus(
+            matching,
+            matching.isInbound
+                ? PhoneCallStatus.ringing
+                : PhoneCallStatus.dialing);
         return;
       }
 
@@ -199,14 +206,16 @@ class FlutterPhoneState with WidgetsBindingObserver {
 }
 
 /// The event channel to receive native phone events
-final EventChannel _phoneStateCallEventChannel = EventChannel('co.sunnyapp/phone_events');
+final EventChannel _phoneStateCallEventChannel =
+    EventChannel('co.sunnyapp/phone_events');
 
 /// Native event stream, lazily created.  See [nativeEvents]
 Stream<RawPhoneEvent> _nativeEvents;
 
 /// A stream of [RawPhoneEvent] instances.  The stream only contains null values if there was an error
 Stream<RawPhoneEvent> get _initializedNativeEvents {
-  _nativeEvents ??= _phoneStateCallEventChannel.receiveBroadcastStream().map((dyn) {
+  _nativeEvents ??=
+      _phoneStateCallEventChannel.receiveBroadcastStream().map((dyn) {
     try {
       if (dyn == null) return null;
       if (dyn is! Map) {
@@ -215,7 +224,8 @@ Stream<RawPhoneEvent> get _initializedNativeEvents {
       }
       final Map<String, dynamic> event = (dyn as Map).cast();
       final eventType = _parseEventType(event["type"] as String);
-      return RawPhoneEvent(event["id"] as String, event["phoneNumber"] as String, eventType);
+      return RawPhoneEvent(
+          event["id"] as String, event["phoneNumber"] as String, eventType);
     } catch (e, stack) {
       _log.severe("Error handling native event $e", e, stack);
       return null;
@@ -264,7 +274,9 @@ Future<LinkOpenResult> _openTelLink(String appLink) async {
     return LinkOpenResult.invalidInput;
   }
   if (await canLaunch(appLink)) {
-    return (await launch(appLink)) ? LinkOpenResult.success : LinkOpenResult.failed;
+    return (await launch(appLink))
+        ? LinkOpenResult.success
+        : LinkOpenResult.failed;
   } else {
     return LinkOpenResult.unsupported;
   }
