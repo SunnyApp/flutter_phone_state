@@ -4,4 +4,8 @@
 
 ## 0.5.4
 
-* Trying to eliminate pub errors
+* Trying to eliminate pub errorse
+
+## 0.5.5
+
+* Removed extension methods and downgraded required version

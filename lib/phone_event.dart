@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_phone_state/extensions.dart';
+import 'package:flutter_phone_state/extensions_static.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
@@ -30,7 +30,7 @@ class RawPhoneEvent {
 
   @override
   String toString() {
-    return 'RawPhoneEvent{type: ${type.value}, id: ${id.truncate(12) ?? '-'}, phoneNumber: ${phoneNumber ?? '-'}}';
+    return 'RawPhoneEvent{type: ${value(type)}, id: ${truncate(id, 12) ?? '-'}, phoneNumber: ${phoneNumber ?? '-'}}';
   }
 
   @override
@@ -64,9 +64,9 @@ class PhoneCallEvent {
 
   @override
   String toString() {
-    return 'PhoneCallEvent{status: ${status.value}, '
-        'id: ${call?.id?.truncate(12)} '
-        'callId: ${call?.callId?.truncate(12) ?? '-'}, '
+    return 'PhoneCallEvent{status: ${value(status)}, '
+        'id: ${truncate(call?.id, 12)} '
+        'callId: ${truncate(call?.callId, 12) ?? '-'}, '
         'phoneNumber: ${call?.phoneNumber ?? '-'}}';
   }
 }
@@ -141,7 +141,7 @@ class PhoneCall {
   /// The duration of this call.  This duration will represent the elasped time, until the call
   /// completes.
   Duration get duration {
-    return _duration ?? startTime.sinceNow();
+    return _duration ?? sinceNow(startTime);
   }
 
   /// Subscribes to all events for this call
@@ -162,8 +162,8 @@ class PhoneCall {
   /// - It's in a dialing state for more than 30 seconds
   /// - It's in an active state for more than 8 hours
   bool get isExpired {
-    if (status == PhoneCallStatus.dialing && startTime.sinceNow().inSeconds > 30) return true;
-    if (status == PhoneCallStatus.connected && startTime.sinceNow().inHours > 8) return true;
+    if (status == PhoneCallStatus.dialing && sinceNow(startTime).inSeconds > 30) return true;
+    if (status == PhoneCallStatus.connected && sinceNow(startTime).inHours > 8) return true;
     return false;
   }
 
@@ -193,7 +193,7 @@ class PhoneCall {
     final event = PhoneCallEvent(this, status);
     this.events.add(event);
     if (_eventStream?.isClosed == true) {
-      throw "Illegal state for call ${id.truncate(12)}:  Received status event after closing stream";
+      throw "Illegal state for call ${truncate(id, 12)}:  Received status event after closing stream";
     }
     _eventStream?.add(event);
     return event;

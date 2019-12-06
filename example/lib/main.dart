@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_state/extensions.dart';
+import 'package:flutter_phone_state/extensions_static.dart';
 import 'package:flutter_phone_state/flutter_phone_state.dart';
 
 void main() {
@@ -99,9 +99,9 @@ class _MyAppState extends State<MyApp> {
                     ]),
                     for (final event in _rawEvents)
                       TableRow(children: [
-                        _cell(event.id.truncate(8)),
+                        _cell(truncate(event.id, 8)),
                         _cell(event.phoneNumber),
-                        _cell(event.type.value),
+                        _cell(value(event.type)),
                       ]),
                   ],
                 ),
@@ -149,16 +149,16 @@ class _CallCard extends StatelessWidget {
           dense: true,
           leading: Icon(phoneCall.isOutbound ? Icons.arrow_upward : Icons.arrow_downward),
           title: Text(
-            "+${phoneCall.phoneNumber ?? "Unknown number"}: ${phoneCall.status.value}",
+            "+${phoneCall.phoneNumber ?? "Unknown number"}: ${value(phoneCall.status)}",
             overflow: TextOverflow.visible,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (phoneCall.id?.isNotEmpty == true) Text("id: ${phoneCall.id.truncate(12)}"),
+              if (phoneCall.id?.isNotEmpty == true) Text("id: ${truncate(phoneCall.id, 12)}"),
               for (final event in phoneCall.events)
                 Text(
-                  "- ${event.status.value ?? "-"}",
+                  "- ${value(event.status) ?? "-"}",
                   maxLines: 1,
                 ),
             ],

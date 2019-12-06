@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_phone_state/extensions.dart';
+import 'package:flutter_phone_state/extensions_static.dart';
 import 'package:flutter_phone_state/logging.dart';
 import 'package:flutter_phone_state/phone_event.dart';
 import 'package:logging/logging.dart';
@@ -62,9 +62,9 @@ class FlutterPhoneState with WidgetsBindingObserver {
     // Either the first matching, or the first one without an ID
     PhoneCall matching;
     if (event.id != null) {
-      matching = _calls.firstOrNull((c) => c.callId == event.id);
+      matching = firstOrNull(_calls, (c) => c.callId == event.id);
     }
-    matching ??= _calls.lastOrNull((call) => call.canBeLinked(event));
+    matching ??= lastOrNull(_calls, (call) => call.canBeLinked(event));
     if (matching != null) {
       // Link them together for future reference
       matching.callId = event.id;
@@ -78,8 +78,8 @@ class FlutterPhoneState with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       /// We wait 1 second because ios has a short flash of resumed before the phone app opens
       Future.delayed(Duration(seconds: 1), () {
-        final expired = _calls.lastOrNull((c) {
-          return c.status == PhoneCallStatus.dialing && c.startTime.sinceNow().inSeconds < 30;
+        final expired = lastOrNull<PhoneCall>(_calls, (PhoneCall c) {
+          return c.status == PhoneCallStatus.dialing && sinceNow(c.startTime).inSeconds < 30;
         });
 
         if (expired != null) {
@@ -129,7 +129,7 @@ class FlutterPhoneState with WidgetsBindingObserver {
     // create an event
     PhoneCallEvent event;
     if (call.events.any((e) => e.status == status)) {
-      _log.fine("Call ${call.id.truncate(8)} already has status $status");
+      _log.fine("Call ${truncate(call.id, 8)} already has status $status");
     }
     if (status == PhoneCallStatus.disconnected ||
         status == PhoneCallStatus.timedOut ||
