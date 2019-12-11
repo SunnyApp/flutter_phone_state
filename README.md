@@ -16,7 +16,7 @@ A Flutter plugin that makes it easier to make and track phone calls.  The core f
 Install the plugin:
 
 ```yaml
-flutter_phone_state: ^0.5.7
+flutter_phone_state: ^0.5.8
 ```
 
 ## Before you start
