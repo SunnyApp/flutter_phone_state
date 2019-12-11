@@ -9,3 +9,4 @@
 ## 0.5.5
 
 * Removed extension methods and downgraded required version
+
