@@ -1,5 +1,9 @@
 # Flutter Phone State Plugin
 
+[![pub package](https://img.shields.io/pub/v/flutter_phone_state.svg)](https://pub.dartlang.org/packages/flutter_phone_state)
+[![Coverage Status](https://coveralls.io/repos/github/SunnyApp/flutter_phone_state/badge.svg?branch=master)](https://coveralls.io/github/SunnyApp/flutter_phone_state?branch=master)
+
+
 A Flutter plugin that makes it easier to make and track phone calls.  The core features are:
 
 1.  Initiate a phone call in 1 line of code
