@@ -1,6 +1,6 @@
 name: flutter_phone_state
 description: This plugin provides an easy way to make phone calls, and track the state of the phone call
-version: 0.5.8
+version: 0.5.9
 homepage: "https://github.com/SunnyApp/flutter_phone_state.git"
 
 environment:
@@ -10,11 +10,10 @@ dependencies:
   flutter:
     sdk: flutter
 
-
-  url_launcher: ^5.2.7
-  logging: ^0.11.3+2
+  url_launcher: ^5.4.2
+  logging: ^0.11.4
   uuid: ^2.0.4
-  stream_transform: ^0.0.19
+  stream_transform: ^1.1.0
 
 
 dev_dependencies:
