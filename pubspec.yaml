@@ -14,6 +14,7 @@ dependencies:
   logging: ^0.11.4
   uuid: ^2.0.4
   stream_transform: ^1.1.0
+  intent:
 
 
 dev_dependencies:
