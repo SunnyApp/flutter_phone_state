@@ -6,6 +6,8 @@ import 'package:flutter_phone_state/extensions_static.dart';
 import 'package:flutter_phone_state/logging.dart';
 import 'package:flutter_phone_state/phone_event.dart';
 import 'package:logging/logging.dart';
+import 'package:intent/intent.dart' as android_intent;
+import 'package:intent/action.dart' as android_action;
 import 'package:url_launcher/url_launcher.dart';
 
 export 'package:flutter_phone_state/phone_event.dart';
@@ -79,13 +81,12 @@ class FlutterPhoneState with WidgetsBindingObserver {
       /// We wait 1 second because ios has a short flash of resumed before the phone app opens
       Future.delayed(Duration(seconds: 1), () {
         final expired = lastOrNull<PhoneCall>(_calls, (PhoneCall c) {
-          return c.status == PhoneCallStatus.dialing &&
-              sinceNow(c.startTime).inSeconds < 30;
+          return c.status == PhoneCallStatus.dialing && sinceNow(c.startTime).inSeconds < 30;
         });
 
-        if (expired != null) {
-          _changeStatus(expired, PhoneCallStatus.cancelled);
-        }
+        // if (expired != null) {
+        //   _changeStatus(expired, PhoneCallStatus.cancelled);
+        // }
       });
     }
   }
@@ -102,6 +103,8 @@ class FlutterPhoneState with WidgetsBindingObserver {
       final link = "tel:${call.phoneNumber}";
       final status = await _openTelLink(link);
 
+      print(link);
+
       if (status != LinkOpenResult.success) {
         _changeStatus(call, PhoneCallStatus.error);
         return;
@@ -114,6 +117,7 @@ class FlutterPhoneState with WidgetsBindingObserver {
         _changeStatus(call, PhoneCallStatus.timedOut);
       }
     } catch (e) {
+      print("failed because $e");
       _changeStatus(call, PhoneCallStatus.error);
     }
   }
@@ -274,9 +278,13 @@ Future<LinkOpenResult> _openTelLink(String appLink) async {
     return LinkOpenResult.invalidInput;
   }
   if (await canLaunch(appLink)) {
-    return (await launch(appLink))
-        ? LinkOpenResult.success
-        : LinkOpenResult.failed;
+    var intent = android_intent.Intent();
+    intent.setAction(android_action.Action.ACTION_CALL);
+    intent.setData(Uri.parse(appLink));
+    await intent.startActivity().catchError((e){
+      return LinkOpenResult.failed;
+    });
+    return LinkOpenResult.success;
   } else {
     return LinkOpenResult.unsupported;
   }
