@@ -31,7 +31,7 @@ It's recommended that you initiate calls from your app when possible.  This give
 best chance at tracking the call.
 ```dart
 // note: this plugin will remove all non-numeric characters from the phone number
-final phoneCall = FlutterPhoneState.makePhoneCall("480-555-1234"); 
+final phoneCall = FlutterPhoneState.startPhoneCall("480-555-1234"); 
 ```
 
 A `PhoneCall` object is the source of truth for the call
