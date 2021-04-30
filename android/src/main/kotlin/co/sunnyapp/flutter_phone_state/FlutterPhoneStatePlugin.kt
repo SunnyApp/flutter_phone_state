@@ -4,29 +4,37 @@ import android.content.Context
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 import io.flutter.plugin.common.EventChannel
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
+import androidx.annotation.NonNull
 
-class FlutterPhoneStatePlugin(context: Context) : MethodCallHandler, EventChannel.StreamHandler {
-    companion object {
-        @JvmStatic
-        fun registerWith(registrar: Registrar) {
-            val channel = MethodChannel(registrar.messenger(), "flutter_phone_state")
-            val plugin = FlutterPhoneStatePlugin(registrar.context())
-            channel.setMethodCallHandler(plugin)
-
-            val eventSink = EventChannel(registrar.messenger(), "co.sunnyapp/phone_events")
-            eventSink.setStreamHandler(plugin)
-        }
-    }
+class FlutterPhoneStatePlugin: FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
+    private lateinit var channel: MethodChannel
+    private lateinit var eventSink: EventChannel
+    private lateinit var binding: FlutterPlugin.FlutterPluginBinding
 
     private val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
     /// So it doesn't get collected
     private lateinit var listener:PhoneStateListener
+
+    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        binding = flutterPluginBinding;
+        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_phone_state")  
+        channel.setMethodCallHandler(this)
+        eventSink = EventChannel(flutterPluginBinding.binaryMessenger, "co.sunnyapp/phone_events")
+        eventSink.setStreamHandler(this)
+    }
+
+
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        channel.setMethodCallHandler(null)
+        eventChannel.setStreamHandler(null)
+        listener = null
+    }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         if (call.method == "getPlatformVersion") {
