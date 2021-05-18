@@ -1,25 +1,26 @@
 name: flutter_phone_state_example
 description: Demonstrates how to use the flutter_phone_state plugin.
 publish_to: 'none'
+version: 2.0.0
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  intl:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
+  cupertino_icons: 
+  intl:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_phone_state:
     path: ../
+  pedantic: ^1.11.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

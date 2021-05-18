@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter_phone_state/extensions_static.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
+import 'extensions_static.dart';
 
-final Logger _log = Logger("flutterPhoneState");
+final Logger _log = Logger('flutterPhoneState');
 
 /// Represents phone events that surface from the device.  These events can be subscribed to by
 /// using [FlutterPhoneState.rawEventStream]
@@ -15,10 +15,10 @@ class RawPhoneEvent {
   /// android: always null
   /// ios: a uuid
   /// others: ??
-  final String id;
+  final String? id;
 
   /// If available, the phone number being dialed.
-  final String phoneNumber;
+  final String? phoneNumber;
 
   /// The type of call event.
   final RawEventType type;
@@ -26,8 +26,7 @@ class RawPhoneEvent {
   RawPhoneEvent(this.id, this.phoneNumber, this.type);
 
   /// Whether this event represents a new call
-  bool get isNewCall =>
-      type == RawEventType.inbound || type == RawEventType.outbound;
+  bool get isNewCall => type == RawEventType.inbound || type == RawEventType.outbound;
 
   @override
   String toString() {
@@ -61,15 +60,14 @@ class PhoneCallEvent {
   /// @non_null
   final DateTime timestamp;
 
-  PhoneCallEvent(this.call, this.status, [DateTime eventDate])
-      : timestamp = eventDate ?? DateTime.now();
+  PhoneCallEvent(this.call, this.status, [DateTime? eventDate]) : timestamp = eventDate ?? DateTime.now();
 
   @override
   String toString() {
     return 'PhoneCallEvent{status: ${value(status)}, '
-        'id: ${truncate(call?.id, 12)} '
-        'callId: ${truncate(call?.callId, 12) ?? '-'}, '
-        'phoneNumber: ${call?.phoneNumber ?? '-'}}';
+        'id: ${truncate(call.id, 12)} '
+        'callId: ${truncate(call.callId, 12) ?? '-'}, '
+        'phoneNumber: ${call.phoneNumber ?? '-'}}';
   }
 }
 
@@ -82,38 +80,37 @@ class PhoneCall {
 
   /// An id assigned to the call by the underlying os
   /// @nullable
-  String callId;
+  String? callId;
 
   /// The phone number being dialed, or the inbound number
   /// @nullabe
-  String phoneNumber;
+  String? phoneNumber;
 
   /// The current status of the call
   /// @non_null
-  PhoneCallStatus status;
+  PhoneCallStatus status = PhoneCallStatus.disconnected;
 
   /// Whether the call is inbound or outbound
   /// @non_null
-  final PhoneCallPlacement placement;
+  late final PhoneCallPlacement placement;
 
   /// When the call was started
-  final DateTime startTime;
+  late final DateTime startTime;
 
   /// A list of events associated with this call
-  final List<PhoneCallEvent> events;
+  late final List<PhoneCallEvent> events;
 
   /// Whether or not this call is complete.  see [isComplete]
   bool _isComplete = false;
 
   /// Used internally to track the call events, can be subscribed to, or awaited on.
-  StreamController<PhoneCallEvent> _eventStream;
+  StreamController<PhoneCallEvent>? _eventStream;
 
   /// The final call duration.  See [duration]
-  Duration _duration;
+  Duration? _duration;
 
-  PhoneCall.start(this.phoneNumber, this.placement, [String id])
-      : status = null,
-        id = id ?? Uuid().v4(),
+  PhoneCall.start(this.phoneNumber, this.placement, [String? id])
+      : id = id ?? Uuid().v4(),
         events = <PhoneCallEvent>[],
         startTime = DateTime.now();
 
@@ -126,18 +123,21 @@ class PhoneCall {
 
   /// Marks this call as complete, and returns the final event as a [FutureOr].  If the
   /// event stream has subscribers, it will first close, and then return
-  Future<PhoneCallEvent> complete(PhoneCallStatus status) async {
+  Future<PhoneCallEvent?> complete(PhoneCallStatus status) async {
     if (_isComplete) {
-      throw "Illegal state: This call is already marked complete";
+      throw 'Illegal state: This call is already marked complete';
     }
-    this._duration = DateTime.now().difference(startTime);
+    _duration = DateTime.now().difference(startTime);
     final event = recordStatus(status);
     _isComplete = true;
-    if (_eventStream?.isClosed == false) {
-      await _eventStream.close();
-      return event;
-    } else {
-      return event;
+    final stream = _eventStream;
+    if (stream != null) {
+      if (stream.isClosed == false) {
+        await stream.close();
+        return event;
+      } else {
+        return event;
+      }
     }
   }
 
@@ -156,7 +156,7 @@ class PhoneCall {
   FutureOr<PhoneCall> get done {
     if (_isComplete) return this;
     return _getOrCreateEventController().done.then((_) {
-      _log.info("Finished call.  Status $status");
+      _log.info('Finished call.  Status $status');
       return this;
     });
   }
@@ -165,10 +165,8 @@ class PhoneCall {
   /// - It's in a dialing state for more than 30 seconds
   /// - It's in an active state for more than 8 hours
   bool get isExpired {
-    if (status == PhoneCallStatus.dialing && sinceNow(startTime).inSeconds > 30)
-      return true;
-    if (status == PhoneCallStatus.connected && sinceNow(startTime).inHours > 8)
-      return true;
+    if (status == PhoneCallStatus.dialing && sinceNow(startTime).inSeconds > 30) return true;
+    if (status == PhoneCallStatus.connected && sinceNow(startTime).inHours > 8) return true;
     return false;
   }
 
@@ -178,10 +176,8 @@ class PhoneCall {
   /// Whether this call can be linked to the provided event.  This check is fairly loose, it makes sure that
   /// the values aren't for two disparate ids, phone numbers, and that the status is a subsequent status
   bool canBeLinked(RawPhoneEvent event) {
-    if (event.phoneNumber != null &&
-        this.phoneNumber != null &&
-        event.phoneNumber != this.phoneNumber) return false;
-    if (this.callId != null && this.callId != event.id) return false;
+    if (event.phoneNumber != null && phoneNumber != null && event.phoneNumber != phoneNumber) return false;
+    if (callId != null && callId != event.id) return false;
     if (isNotBefore(status, event.type)) return false;
 
     return true;
@@ -189,8 +185,7 @@ class PhoneCall {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PhoneCall && runtimeType == other.runtimeType && id == other.id;
+      identical(this, other) || other is PhoneCall && runtimeType == other.runtimeType && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -199,9 +194,10 @@ class PhoneCall {
   PhoneCallEvent recordStatus(PhoneCallStatus status) {
     this.status = status;
     final event = PhoneCallEvent(this, status);
-    this.events.add(event);
+    events.add(event);
+
     if (_eventStream?.isClosed == true) {
-      throw "Illegal state for call ${truncate(id, 12)}:  Received status event after closing stream";
+      throw 'Illegal state for call ${truncate(id, 12)}:  Received status event after closing stream';
     }
     _eventStream?.add(event);
     return event;
@@ -212,25 +208,12 @@ class PhoneCall {
 }
 
 enum RawEventType { inbound, outbound, connected, disconnected }
-enum PhoneCallStatus {
-  ringing,
-  dialing,
-  cancelled,
-  error,
-  connecting,
-  connected,
-  timedOut,
-  disconnected
-}
+enum PhoneCallStatus { ringing, dialing, cancelled, error, connecting, connected, timedOut, disconnected }
 enum PhoneCallPlacement { inbound, outbound }
 
 const Map<RawEventType, Set<PhoneCallStatus>> priorStatuses = {
   RawEventType.outbound: {PhoneCallStatus.dialing},
-  RawEventType.connected: {
-    PhoneCallStatus.connecting,
-    PhoneCallStatus.ringing,
-    PhoneCallStatus.dialing
-  },
+  RawEventType.connected: {PhoneCallStatus.connecting, PhoneCallStatus.ringing, PhoneCallStatus.dialing},
   RawEventType.inbound: {},
   RawEventType.disconnected: {
     PhoneCallStatus.connecting,
@@ -240,8 +223,7 @@ const Map<RawEventType, Set<PhoneCallStatus>> priorStatuses = {
   },
 };
 
-bool isNotBefore(PhoneCallStatus status, RawEventType type) =>
-    !isBefore(status, type);
+bool isNotBefore(PhoneCallStatus status, RawEventType type) => !isBefore(status, type);
 
 bool isBefore(PhoneCallStatus status, RawEventType type) {
   return priorStatuses[type]?.contains(status) == true;
