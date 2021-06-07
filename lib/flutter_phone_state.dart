@@ -219,9 +219,12 @@ Stream<RawPhoneEvent?> get _initializedNativeEvents {
         _log.warning('Unexpected result type for phone event.  '
             "Expected Map<String, dynamic> but got ${dyn?.runtimeType ?? 'null'} ");
       }
-      final event = (dyn as Map).cast();
-      final eventType = _parseEventType(event['type'] as String);
-      return RawPhoneEvent(event['id'] as String, event['phoneNumber'] as String, eventType);
+      final event = Map<String, dynamic>.from(dyn);
+      return RawPhoneEvent(
+        (event['id'] is String) ? event['id'] as String : null,
+        (event['phoneNumber'] is String) ? event['phoneNumber'] as String : null,
+        _parseEventType(event['type'] as String),
+      );
     } catch (e, stack) {
       _log.severe('Error handling native event $e', e, stack);
       return null;
