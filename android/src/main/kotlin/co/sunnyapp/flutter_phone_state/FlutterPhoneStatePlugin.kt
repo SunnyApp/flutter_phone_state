@@ -15,25 +15,27 @@ class FlutterPhoneStatePlugin: FlutterPlugin, MethodCallHandler, EventChannel.St
     private lateinit var channel: MethodChannel
     private lateinit var eventSink: EventChannel
     private lateinit var binding: FlutterPlugin.FlutterPluginBinding
+    private lateinit var context: Context
 
-    private val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+    private lateinit var telephonyManager: TelephonyManager
 
     /// So it doesn't get collected
     private lateinit var listener:PhoneStateListener
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        binding = flutterPluginBinding;
+        binding = flutterPluginBinding
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_phone_state")  
         channel.setMethodCallHandler(this)
         eventSink = EventChannel(flutterPluginBinding.binaryMessenger, "co.sunnyapp/phone_events")
         eventSink.setStreamHandler(this)
+        context = flutterPluginBinding.applicationContext
+        telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
     }
 
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        eventChannel.setStreamHandler(null)
-        listener = null
+        eventSink.setStreamHandler(null)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
