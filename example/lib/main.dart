@@ -18,11 +18,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  List<RawPhoneEvent> _rawEvents;
-  List<PhoneCallEvent> _phoneEvents;
+  late List<RawPhoneEvent> _rawEvents;
+  late List<PhoneCallEvent> _phoneEvents;
 
   /// The result of the user typing
-  String _phoneNumber;
+  String? _phoneNumber;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
     _rawEvents = _accumulate(FlutterPhoneState.rawPhoneEvents);
   }
 
-  List<R> _accumulate<R>(Stream<R> input) {
+  List<R> _accumulate<R>(Stream<R?> input) {
     final items = <R>[];
     input.forEach((item) {
       if (item != null) {
@@ -44,8 +44,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   /// Extracts a list of phone calls from the accumulated events
-  Iterable<PhoneCall> get _completedCalls =>
-      Map.fromEntries(_phoneEvents.reversed.map((PhoneCallEvent event) {
+  Iterable<PhoneCall> get _completedCalls => Map.fromEntries(_phoneEvents.reversed.map((PhoneCallEvent event) {
         return MapEntry(event.call.id, event.call);
       })).values.where((c) => c.isComplete).toList();
 
@@ -64,29 +63,26 @@ class _MyAppState extends State<MyApp> {
                   flex: 1,
                   child: TextField(
                     onChanged: (v) => _phoneNumber = v,
-                    decoration: InputDecoration(labelText: "Phone number"),
+                    decoration: InputDecoration(labelText: 'Phone number'),
                   )),
               MaterialButton(
                 onPressed: () => _initiateCall(),
-                child: Text("Make Call", style: TextStyle(color: Colors.white)),
                 color: Colors.blue,
+                child: Text('Make Call', style: TextStyle(color: Colors.white)),
               ),
             ]),
             verticalSpace,
-            _title("Current Calls"),
-            for (final call in FlutterPhoneState.activeCalls)
-              _CallCard(phoneCall: call),
-            if (FlutterPhoneState.activeCalls.isEmpty)
-              Center(child: Text("No Active Calls")),
-            _title("Call History"),
+            _title('Current Calls'),
+            for (final call in FlutterPhoneState.activeCalls) _CallCard(phoneCall: call),
+            if (FlutterPhoneState.activeCalls.isEmpty) Center(child: Text('No Active Calls')),
+            _title('Call History'),
             for (final call in _completedCalls)
               _CallCard(
                 phoneCall: call,
               ),
-            if (_completedCalls.isEmpty)
-              Center(child: Text("No Completed Calls")),
+            if (_completedCalls.isEmpty) Center(child: Text('No Completed Calls')),
             verticalSpace,
-            _title("Raw Event History"),
+            _title('Raw Event History'),
             if (_rawEvents.isNotEmpty)
               Padding(
                 padding: EdgeInsets.all(10),
@@ -94,12 +90,12 @@ class _MyAppState extends State<MyApp> {
                   children: [
                     TableRow(children: [
                       Text(
-                        "id",
+                        'id',
                         style: listHeaderStyle,
                         maxLines: 1,
                       ),
-                      Text("number", style: listHeaderStyle),
-                      Text("event", style: listHeaderStyle),
+                      Text('number', style: listHeaderStyle),
+                      Text('event', style: listHeaderStyle),
                     ]),
                     for (final event in _rawEvents)
                       TableRow(children: [
@@ -110,7 +106,7 @@ class _MyAppState extends State<MyApp> {
                   ],
                 ),
               ),
-            if (_rawEvents.isEmpty) Center(child: Text("No Raw Events")),
+            if (_rawEvents.isEmpty) Center(child: Text('No Raw Events')),
           ],
         ),
       ),
@@ -132,10 +128,11 @@ class _MyAppState extends State<MyApp> {
         child: Text(text?.toString() ?? '-', maxLines: 1, style: headerStyle));
   }
 
-  _initiateCall() {
-    if (_phoneNumber?.isNotEmpty == true) {
+  Future<void> _initiateCall() async {
+    final phoneNumber = _phoneNumber;
+    if (phoneNumber != null && phoneNumber.isNotEmpty) {
       setState(() {
-        FlutterPhoneState.startPhoneCall(_phoneNumber);
+        FlutterPhoneState.startPhoneCall(phoneNumber);
       });
     }
   }
@@ -144,15 +141,17 @@ class _MyAppState extends State<MyApp> {
 class _CallCard extends StatelessWidget {
   final PhoneCall phoneCall;
 
-  const _CallCard({Key key, this.phoneCall}) : super(key: key);
+  const _CallCard({
+    Key? key,
+    required this.phoneCall,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
           dense: true,
-          leading: Icon(
-              phoneCall.isOutbound ? Icons.arrow_upward : Icons.arrow_downward),
+          leading: Icon(phoneCall.isOutbound ? Icons.arrow_upward : Icons.arrow_downward),
           title: Text(
             "+${phoneCall.phoneNumber ?? "Unknown number"}: ${value(phoneCall.status)}",
             overflow: TextOverflow.visible,
@@ -160,11 +159,10 @@ class _CallCard extends StatelessWidget {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (phoneCall.id?.isNotEmpty == true)
-                Text("id: ${truncate(phoneCall.id, 12)}"),
+              if (phoneCall.id.isNotEmpty) Text('id: ${truncate(phoneCall.id, 12)}'),
               for (final event in phoneCall.events)
                 Text(
-                  "- ${value(event.status) ?? "-"}",
+                  '- ${value(event.status)}',
                   maxLines: 1,
                 ),
             ],
@@ -172,7 +170,7 @@ class _CallCard extends StatelessWidget {
           trailing: FutureBuilder<PhoneCall>(
             builder: (context, snap) {
               if (snap.hasData && snap.data?.isComplete == true) {
-                return Text("${phoneCall.duration?.inSeconds ?? '?'}s");
+                return Text('${phoneCall.duration.inSeconds}s');
               } else {
                 return CircularProgressIndicator();
               }

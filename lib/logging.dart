@@ -7,10 +7,14 @@ import 'package:logging/logging.dart';
 typedef Logging = void Function(LogRecord record);
 
 /// Keeps the old logging subscription, so we can cancel at reconfigure
-StreamSubscription<LogRecord> _subscription;
+StreamSubscription<LogRecord>? _subscription;
 
 /// Configures a single logger.  By default will
-configureLogging({Logger logger, Level level, Logging onLog}) async {
+Future<void> configureLogging({
+  Logger? logger,
+  Level? level,
+  Logging? onLog,
+}) async {
   level ??= Level.INFO;
   logger ??= Logger.root;
   onLog ??= defaultLogging(logger);
