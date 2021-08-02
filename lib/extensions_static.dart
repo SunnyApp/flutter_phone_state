@@ -1,15 +1,23 @@
+import 'package:collection/collection.dart';
+
 Duration sinceNow(DateTime self) => -(self.difference(DateTime.now()));
 
 X? find<X>(List<X?>? self, bool Function(X? input) filter) {
-  return self?.firstWhere(filter, orElse: () => null);
+  return self?.firstWhereOrNull(
+    filter,
+  );
 }
 
 X? lastOrNull<X>(List<X?>? self, bool Function(X? input) filter) {
-  return self?.lastWhere(filter, orElse: () => null);
+  return self?.lastWhereOrNull(
+    filter,
+  );
 }
 
 X? firstOrNull<X>(List<X?>? self, bool Function(X? input) filter) {
-  return self?.firstWhere(filter, orElse: () => null);
+  return self?.firstWhereOrNull(
+    filter,
+  );
 }
 
 String? truncate(String? self, int length) {
